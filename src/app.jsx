@@ -6,12 +6,14 @@ import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import Login from "./components/Login";
 import FoodCard from "./components/FoodCard";
 import FoodModal from "./components/FoodModal";
+import AddFoodModal from "./components/AddFoodModal";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [foods, setFoods] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showAddFood, setShowAddFood] = useState(false);
 
   const [sortType, setSortType] = useState("rating"); // "rating" | "price_asc" | "price_desc"
 
@@ -109,7 +111,8 @@ export default function App() {
       }
       alert("Sample data added successfully!");
     } catch (e) {
-      alert("Error seeding data: " + e.message);
+      console.error("Seeding Error:", e);
+      alert(`Error seeding data: ${e.message}\nCheck console for more details.`);
     } finally {
       setLoading(false);
     }
@@ -141,6 +144,9 @@ export default function App() {
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
           </select>
+          <button onClick={() => setShowAddFood(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--primary)', border: 'none', color: 'white', padding: '8px 12px', borderRadius: '6px' }}>
+            <PlusCircle size={16} /> Add Food
+          </button>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--glass)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <User size={16} />
@@ -156,10 +162,15 @@ export default function App() {
       <div className="grid">
         {foods.length === 0 ? (
           <div style={{ textAlign: 'center', gridColumn: '1/-1', padding: '40px' }}>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>No foods found. Start by adding sample data.</p>
-            <button onClick={seedFoods} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <PlusCircle size={20} /> Add Sample Menu
-            </button>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>No foods found. Start by adding sample data or add one manually.</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button onClick={seedFoods} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--bg-card)', border: '1px solid var(--glass-border)' }}>
+                Add Sample Menu
+              </button>
+              <button onClick={() => setShowAddFood(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <PlusCircle size={20} /> Add New Item
+              </button>
+            </div>
           </div>
         ) : (
           sortedFoods.map(f => (
@@ -169,6 +180,7 @@ export default function App() {
       </div>
 
       {selected && <FoodModal food={selected} onClose={handleCloseModal} />}
+      {showAddFood && <AddFoodModal onClose={() => setShowAddFood(false)} />}
     </div>
   );
 }
